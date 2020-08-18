@@ -1,17 +1,33 @@
 package com.testML.services.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.testML.model.DnaAnalysis;
+import com.testML.repository.IMutantRepository;
 import com.testML.services.IMutantService;
 
 public class MutantService implements IMutantService{
 
+    @Autowired
+    private IMutantRepository mutantRepository;
+
     @Override
     public boolean isMutant(String[] dna) {
+        boolean isMutant = false;
+        DnaAnalysis analysis = new DnaAnalysis();
+        analysis.setDna(dna);
         //validate NxN
         Integer columnN = dna.length;
         for(String row : dna) {
             Integer rowN = row.length();
-            if(columnN != rowN)
-                return false;
+            if(columnN != rowN) {
+                analysis.setIsMutant(isMutant);
+                saveAnalysis(analysis);
+                return isMutant;
+            }
         }
         //validate horizontal sequence
         //row
@@ -21,7 +37,10 @@ public class MutantService implements IMutantService{
             for(Integer j = 0; j < columnN-3; j++) {
                 Integer countNextEquals = validateNextHor(rowChar,j);
                 if(countNextEquals == 3) {
-                    return true;
+                    isMutant = true;
+                    analysis.setIsMutant(isMutant);
+                    saveAnalysis(analysis);
+                    return isMutant;
                 } else {
                     j = j + countNextEquals;
                 }
@@ -34,7 +53,10 @@ public class MutantService implements IMutantService{
             for(Integer j = 0; j < columnN-3; j++) {
                 Integer countNextEquals = validateNextVer(dna,i,j);
                 if(countNextEquals == 3) {
-                    return true;
+                    isMutant = true;
+                    analysis.setIsMutant(isMutant);
+                    saveAnalysis(analysis);
+                    return isMutant;
                 } else {
                     j = j + countNextEquals;
                 }
@@ -47,11 +69,16 @@ public class MutantService implements IMutantService{
             for(Integer j = 0; j < columnN-3; j++) {
                 Integer countNextEquals = validateNextDia(dna,i,j);
                 if(countNextEquals == 3) {
-                    return true;
+                    isMutant = true;
+                    analysis.setIsMutant(isMutant);
+                    saveAnalysis(analysis);
+                    return isMutant;
                 }
             }
         }
-        return false;
+        analysis.setIsMutant(isMutant);
+        saveAnalysis(analysis);
+        return isMutant;
     }
 
     private Integer validateNextHor(char[] rowChar, Integer baseIndex) {
@@ -88,5 +115,21 @@ public class MutantService implements IMutantService{
             }
         }
         return count;
+    }
+
+    private void saveAnalysis(DnaAnalysis analysis) {
+        mutantRepository.insert(analysis);
+    }
+
+    @Override
+    public Object getStats() {
+        long mutants = mutantRepository.countByIsMutant(true);
+        long humans = mutantRepository.countByIsMutant(false);
+        double ratio = ((double) mutants/humans);
+        Map<String,Object> stats = new HashMap<String,Object>();
+        stats.put("count_mutant_dna", mutants);
+        stats.put("count_human_dna", humans);
+        stats.put("ratio”", ratio);
+        return stats;
     }
 }

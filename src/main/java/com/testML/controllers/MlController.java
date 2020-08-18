@@ -15,7 +15,7 @@ import com.testML.services.IMutantService;
 public class MlController {
     
     @Autowired
-    IMutantService mutant;
+    IMutantService mutantService;
     
     @RequestMapping(value="/mutant/", method = RequestMethod.POST)
     public ResponseEntity<Void> isMutant(@RequestBody Dna dna) {
@@ -23,9 +23,14 @@ public class MlController {
             return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
         if(dna.getDna().length == 0 || dna.getDna().length < 4)
             return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
-        boolean isMutant = mutant.isMutant(dna.getDna());
+        boolean isMutant = mutantService.isMutant(dna.getDna());
         if(isMutant)
             return new ResponseEntity<Void>(HttpStatus.OK);
         return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
+    }
+
+    @RequestMapping(value="/stats", method = RequestMethod.GET)
+    public ResponseEntity<Object> getStats(){
+        return new ResponseEntity<Object>(mutantService.getStats(), HttpStatus.OK);
     }
 }
