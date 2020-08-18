@@ -13,6 +13,7 @@
     <version>1.0.0</version>
     <name>testML</name>
     <description>Test for ML</description>
+    <packaging>war</packaging>
 
     <properties>
         <java.version>1.8</java.version>
@@ -22,6 +23,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
